@@ -1,0 +1,10 @@
+{
+  "name": "ezcompile",
+  "version": "0.1.0",
+  "main": "index.js",
+  "license": "ISC",
+  "dependencies": {
+    "meow": "^10.0.0"
+  },
+  "type": "module"
+}
