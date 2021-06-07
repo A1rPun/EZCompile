@@ -1,11 +1,12 @@
 import { spawn } from 'child_process';
 
 async function cmd(command, ...args) {
+  console.log('[EZCompile] Running command $', command, ...args);
   const proc = spawn(command, args.filter(x => x));
 
   return new Promise((res, rej) => {
     proc.stdout.on('data', (data) => {
-      res(data.toString());
+      process.stdout.write(data.toString());
     });
 
     proc.stderr.on('data', (data) => {
@@ -13,12 +14,12 @@ async function cmd(command, ...args) {
     });
 
     proc.on('error', (error) => {
-      rej(error.message);
+      rej(error);
     });
 
-    // proc.on('close', (code) => {
-    //   console.log(`child process exited with code ${code}`);
-    // });
+    proc.on('exit', (code) => {
+      res(code);
+    });
   });
 }
 
