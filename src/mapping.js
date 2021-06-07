@@ -7,7 +7,7 @@ const compilerMap = {
   groovy: 'groovy', // groovy: `groovyc`,
   jl: 'julia',
   js: 'node',
-  l: 'picolisp',
+  l: 'pil',
   lua: 'lua', // lua: (x, a) => `luac -o ${x} ${x}.lua;lua ${x} ${a};rm ${x}`,
   m: 'octave',
   ml: 'ocaml', // ml: (x, a) => `ocamlc -o ${x} ${x}.ml;./${x} ${a};rm ${x}`,
