@@ -1,44 +1,51 @@
 import { basename, extname } from 'path';
 import command from './command.js';
 import mapping from './mapping.js';
+import logger from './logger.js';
 
-async function main(input) {
+async function doCommand(cmd, ...args) {
+  logger.info('Running command $', cmd, ...args);
+  return command(cmd, ...args);
+}
+
+async function main(input, flags) {
   const [fileName, ...commandArgs] = input;
 
   if (!fileName) {
-    console.log(`Please provide a filename`);
+    logger.info(`Please provide a filename`);
     return;
   }
-  const extension = extname(fileName).slice(1);
+  const extension = flags.lang || extname(fileName).slice(1);
 
   if (!extension) {
-    console.log(`Please provide a filename with an extension`);
+    logger.info(`Please provide a filename with an extension`);
     return;
   }
   const language = mapping[extension];
 
-  if (typeof language === 'string') {
-    try {
-      await command(language, fileName, ...commandArgs);
-    } catch (e) {
-      process.stderr.write(e);
-    }
-  } else if (typeof language === 'function') {
-    const commands = language(basename(fileName, '.' + extension), commandArgs.join(' '));
-    try {
+  try {
+    await tryCommand(language, fileName, extension, commandArgs, flags);
+  } catch (e) {
+    logger.error(`Can't find program "${e?.path}"`, e);
+  }
+}
 
+async function tryCommand(language, fileName, extension, commandArgs, flags) {
+  if (typeof language === 'string') {
+    const program = flags['with'] ?? language;
+    await doCommand(...program.split(' '), fileName, ...commandArgs);
+  } else if (typeof language === 'function') {
+    const baseFileName = basename(fileName, '.' + extension);
+    const commands = language(baseFileName, commandArgs.join(' '));
     await commands
       .split(';')
       .map((c) => {
         const [cmd, ...compilerArgs] = c.split(' ');
-        return () => command(cmd, ...compilerArgs);
+        return () => doCommand(cmd, ...compilerArgs);
       })
       .reduce((prev, curr) => prev.then(curr), Promise.resolve());
-    } catch (e) {
-      process.stderr.write(e);
-    }
   } else {
-    console.log(`No compiler or interpreter found for "${extension}" files`);
+    logger.info(`No compiler or interpreter found for "${extension}" files`);
   }
 }
 

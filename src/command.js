@@ -1,12 +1,12 @@
 import { spawn } from 'child_process';
+import logger from './logger.js';
 
 async function cmd(command, ...args) {
-  console.log('[EZCompile] Running command $', command, ...args);
   const proc = spawn(command, args.filter(x => x));
 
   return new Promise((res, rej) => {
     proc.stdout.on('data', (data) => {
-      process.stdout.write(data.toString());
+      console.log(data.toString());
     });
 
     proc.stderr.on('data', (data) => {

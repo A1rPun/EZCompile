@@ -19,8 +19,19 @@ const cli = meow(`
         type: 'boolean',
         alias: 'h',
       },
+      lang: {
+        type: 'string',
+        alias: 'l',
+      },
+      'with': {
+        type: 'string',
+        alias: 'w',
+      },
     },
   }
 );
 
-ezcompile(cli.input, cli.flags);
+async function main() {
+  await ezcompile(cli.input, cli.flags);
+}
+main();
