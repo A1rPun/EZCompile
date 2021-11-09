@@ -24,19 +24,19 @@ async function main(input, flags) {
   const language = mapping[extension];
 
   try {
-    await tryCommand(language, fileName, extension, commandArgs, flags);
+    await tryCommand(language, fileName, extension, commandArgs, flags['with']);
   } catch (e) {
     logger.error(`Can't find program "${e?.path}"`, e);
   }
 }
 
-async function tryCommand(language, fileName, extension, commandArgs, flags) {
+async function tryCommand(language, fileName, extension, commandArgs, withProgram) {
   if (typeof language === 'string') {
-    const program = flags['with'] ?? language;
+    const program = withProgram ?? language;
     await doCommand(...program.split(' '), fileName, ...commandArgs);
   } else if (typeof language === 'function') {
-    const baseFileName = basename(fileName, '.' + extension);
-    const commands = language(baseFileName, commandArgs.join(' '));
+    const baseFileName = basename(fileName, `.${extension}`);
+    const commands = language(withProgram, baseFileName, commandArgs.join(' '));
     await commands
       .split(';')
       .map((c) => {
